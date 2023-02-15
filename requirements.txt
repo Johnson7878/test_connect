@@ -10,4 +10,4 @@ cfbd==4.4.12
 fastai==2.7.10
 pandas==1.5.3
 numpy==1.24.2
-https://download.pytorch.org/whl/torch-1.13.1-cp310-cp310-manylinux2014_aarch64.whl
+https://download.pytorch.org/whl/cpu/torch-1.13.1+cpu-cp310-cp310-linux_x86_64.whl
