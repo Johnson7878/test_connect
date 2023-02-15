@@ -10,4 +10,4 @@ cfbd==4.4.12
 fastai==2.7.10
 pandas==1.5.3
 numpy==1.24.2
-torchvision==0.14.1+cpu
+https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp37-cp37m-linux_x86_64.whl
