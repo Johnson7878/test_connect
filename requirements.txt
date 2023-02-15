@@ -11,3 +11,4 @@ fastai==2.7.10
 pandas==1.5.3
 numpy==1.24.2
 https://download.pytorch.org/whl/cpu/torch-1.13.1%2Bcpu-cp310-cp310-linux_x86_64.whl
+
