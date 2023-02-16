@@ -5,6 +5,9 @@ import os
 from dotenv import load_dotenv
 from mysql.connector import Error
 import mysql.connector
+import pathlib
+plt = platform.system()
+if plt == 'Windows': pathlib.WindowsPath = pathlib.PosixPath
 
 app = Flask(__name__)
 
