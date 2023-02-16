@@ -1,21 +1,11 @@
 from flask import Flask, request, jsonify
-import cfbd
-import numpy as np
-import pandas as pd
-
 from fastai.tabular import *
 from fastai.tabular.all import *
-#configure cfbd client-host connection
-configuration = cfbd.Configuration()
-configuration.api_key['Authorization'] = 'uHZyMKEnExs1jxdAWvwmblkR3+vRvnTFT7Ene2/kAMsZefXA3tabMMugpG6hQWh4'
-configuration.api_key_prefix['Authorization'] = 'Bearer'
+import os
+from dotenv import load_dotenv
+from mysql.connector import Error
+import mysql.connector
 
-api_config = cfbd.ApiClient(configuration)
-teams_api = cfbd.TeamsApi(api_config)
-ratings_api = cfbd.RatingsApi(api_config)
-games_api = cfbd.GamesApi(api_config)
-stats_api = cfbd.StatsApi(api_config)
-betting_api = cfbd.BettingApi(api_config)
 app = Flask(__name__)
 
 
@@ -64,43 +54,26 @@ def respond():
 
     # Return the response in json format
     
-    games = []
-    lines = []
+    load_dotenv()
 
-    for year in range(int(syear), int(eyear)):
-        response = games_api.get_games(year=year)
-        games = [*games, *response]
+    connection = mysql.connector.connect(
+    host=os.getenv("HOST"),
+    database=os.getenv("DATABASE"),
+    user=os.getenv("IDENTITY"),
+    password=os.getenv("PASSWORD"),
+    ssl_ca=os.getenv("SSL_CERT")
+    )
 
-        response = betting_api.get_lines(year=year)
-        lines = [*lines, *response]
-    games = [g for g in games if g.home_conference is not None and g.away_conference is not None and g.home_points is not None and g.away_points is not None]
-    games = [
-    dict(
-        id = g.id,
-        year = g.season,
-        week = g.week,
-        neutral_site = g.neutral_site,
-        home_team = g.home_team,
-        home_conference = g.home_conference,
-        home_points = g.home_points,
-        home_elo = g.home_pregame_elo,
-        away_team = g.away_team,
-        away_conference = g.away_conference,
-        away_points = g.away_points,
-        away_elo = g.away_pregame_elo
-    ) for g in games]
-    for game in games:
-        game_lines = [l for l in lines if l.id == game['id']]
 
-        if len(game_lines) > 0:
-            game_line = [l for l in game_lines[0].lines if l.provider == 'consensus']
+    cursor = connection.cursor()
+    sql = "SELECT * FROM data WHERE year = " + syear
+    cursor.execute(sql)
+    from pandas import DataFrame
+    df = DataFrame(cursor.fetchall())
+    df.columns = ["id", "year" , "week" , "neutral_site", "home_team", "home_conference", "home_points", "home_elo", "away_team", "away_conference", "away_points", "away_elo", "spread", "margin"]
+    connection.close()
 
-            if len(game_line) > 0 and game_line[0].spread is not None:
-                game['spread'] = float(game_line[0].spread)
-    games = [g for g in games if 'spread' in g and g['spread'] is not None]
-    for game in games:
-        game['margin'] = game['away_points'] - game['home_points']
-    df = pd.DataFrame.from_records(games).dropna()
+
     learn = load_learner('talking_tech_neural_net')
     dumpster = df.query(f"year == {des_year}")
     pdf = dumpster.copy()
