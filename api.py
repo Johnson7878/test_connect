@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from fastai.tabular import *
 from fastai.tabular.all import *
 import os
@@ -8,6 +9,7 @@ import pathlib
 pathlib.WindowsPath = pathlib.PosixPath
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/getinps/', methods=['GET'])
