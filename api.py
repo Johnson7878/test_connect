@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from fastai.tabular import *
 from fastai.tabular.all import *
 import os
-from dotenv import load_dotenv
 from mysql.connector import Error
 import mysql.connector
 
@@ -54,14 +53,16 @@ def respond():
 
     # Return the response in json format
     
-    load_dotenv()
 
     connection = mysql.connector.connect(
-    host=os.getenv("HOST"),
-    database=os.getenv("DATABASE"),
-    user=os.getenv("IDENTITY"),
-    password=os.getenv("PASSWORD"),
-    ssl_ca=os.getenv("SSL_CERT")
+    host="us-east.connect.psdb.cloud",
+    database="gatornetics",
+    user="e24p22mu6wajaaxgbjx9",
+    password="pscale_pw_V89FpSn6pbE9ildQotJoKnajhsoOVTGXF2PwYXUV1V1",
+    ssl_mode = "VERIFY_IDENTITY",
+    ssl      = {
+        "ca": "/etc/ssl/certs/ca-certificates.crt"
+    }
     )
 
 
