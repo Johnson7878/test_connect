@@ -59,9 +59,7 @@ def respond():
     database="gatornetics",
     user="e24p22mu6wajaaxgbjx9",
     password="pscale_pw_V89FpSn6pbE9ildQotJoKnajhsoOVTGXF2PwYXUV1V1",
-    ssl      = {
-        "ca": "/etc/ssl/certs/ca-certificates.crt"
-        }
+    ssl_ca="/etc/ssl/certs/ca-certificates.crt",
     )
 
 
