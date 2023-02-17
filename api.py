@@ -4,6 +4,8 @@ from fastai.tabular.all import *
 import os
 from mysql.connector import Error
 import mysql.connector
+import pathlib
+pathlib.WindowsPath = pathlib.PosixPath
 
 app = Flask(__name__)
 
