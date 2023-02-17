@@ -56,9 +56,9 @@ def respond():
 
     connection = mysql.connector.connect(
     host="us-east.connect.psdb.cloud",
-    database="gatornetics",
-    user="e5ew06nehy85dfcgz7fg",
-    password="pscale_pw_wXnrgMBRYi8Cb7Xnv6oAfVlFq5M6i6vMkh6Kqzt9GL2",
+    database="gatadata",
+    user="7bqi3gfwamobsbuo7e6x",
+    password="pscale_pw_cRkCN3J7mdynPokp2V9r3g0DwdhB8hVGxHe12UalsDg",
     ssl_ca="/etc/ssl/certs/ca-certificates.crt",
     )
 
