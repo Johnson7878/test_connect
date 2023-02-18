@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from fastai.tabular import *
 from fastai.tabular.all import *
 import os
-from dotenv import load_dotenv
 from mysql.connector import Error
 import mysql.connector
+import pathlib
+pathlib.WindowsPath = pathlib.PosixPath
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/getinps/', methods=['GET'])
@@ -54,14 +57,13 @@ def respond():
 
     # Return the response in json format
     
-    load_dotenv()
 
     connection = mysql.connector.connect(
-    host=os.getenv("HOST"),
-    database=os.getenv("DATABASE"),
-    user=os.getenv("IDENTITY"),
-    password=os.getenv("PASSWORD"),
-    ssl_ca=os.getenv("SSL_CERT")
+    host="us-east.connect.psdb.cloud",
+    database="gatadata",
+    user="7bqi3gfwamobsbuo7e6x",
+    password="pscale_pw_cRkCN3J7mdynPokp2V9r3g0DwdhB8hVGxHe12UalsDg",
+    ssl_ca="/etc/ssl/certs/ca-certificates.crt",
     )
 
 

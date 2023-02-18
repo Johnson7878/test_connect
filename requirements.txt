@@ -1,6 +1,7 @@
 ﻿click==8.1.3
 colorama==0.4.6
 Flask==2.2.2
+Flask-Cors==3.0.10
 gunicorn==20.1.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
@@ -11,4 +12,5 @@ fastai==2.7.10
 pandas==1.5.3
 numpy==1.24.2
 https://download.pytorch.org/whl/cpu/torch-1.13.1%2Bcpu-cp310-cp310-linux_x86_64.whl
+mysql-connector-python==8.0.32
 
