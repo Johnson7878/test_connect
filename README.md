@@ -1,2 +1,2 @@
 # test_connect
-testing for ML deployment through Flask/Gunicorn
+Cole's Final Play Simulator for the Gatornetics team. With this code, we put the headset on you and have you call the final play of a close game between any 2 teams in FBS. Our data is based on the 2022 FBS season and includes a Random Forest classifier with a KMeans Clustering model for accurate play prediction based on the user input. With that being said, dive in and good luck coach!
