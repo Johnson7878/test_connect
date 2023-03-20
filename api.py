@@ -1,88 +1,137 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-from fastai.tabular import *
-from fastai.tabular.all import *
+import pickle
+import random
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
 import os
-from mysql.connector import Error
-import mysql.connector
-import pathlib
-pathlib.WindowsPath = pathlib.PosixPath
+
 
 app = Flask(__name__)
-CORS(app)
 
 
 @app.route('/getinps/', methods=['GET'])
 def respond():
     # Retrieve the name from the url parameter /getmsg/?name=
-    syear = request.args.get("syear", None)
-    eyear = request.args.get("eyear", None)
-    week = request.args.get("week", None)
-    home_team = request.args.get("home_team", None)
-    away_team = request.args.get("away_team", None)
-    des_year = request.args.get("des_year", None)
+    
+    defenseScore = request.args.get("defenseScore", None)
+    offenseScore = request.args.get("offenseScore", None)
+    ytg = request.args.get("ytg", None)
+    offense_team = request.args.get("offense_team", None)
+    defense_team = request.args.get("defense_team", None)
+    play = request.args.get("play", None)
     key = request.args.get("key", None)
 
     # For debugging
-    print(f"Received: {syear}")
-    print(f"Received: {eyear}")
-    print(f"Received: {week}")
-    print(f"Received: {home_team}")
-    print(f"Received: {away_team}")
-    print(f"Received: {des_year}")
+    print(f"Received: {defenseScore}")
+    print(f"Received: {offenseScore}")
+    print(f"Received: {ytg}")
+    print(f"Received: {offense_team}")
+    print(f"Received: {defense_team}")
+    print(f"Received: {play}")
     print(f"Received: {key}")
 
     response = {}
 
     # Check if the user sent a name at all
-    if not syear:
-        response["ERROR"] = "No year found. Please send a year."
-    elif not eyear:
-        response["ERROR"] = "No year found. Please send a year."
-    elif not week:
-        response["ERROR"] = "No week found. Please send a week."
-    elif not home_team:
+    if not defenseScore:
+        response["ERROR"] = "No Defense Score found. Please send a Score."
+    elif not offenseScore:
+        response["ERROR"] = "No Offense Score found. Please send a Score."
+    elif not ytg:
+        response["ERROR"] = "No ytg found. Please send a ytg."
+    elif not offense_team:
         response["ERROR"] = "No team found. Please send a team."
-    elif not away_team:
+    elif not defense_team:
         response["ERROR"] = "No team found. Please send a team."
-    elif not des_year:
-        response["ERROR"] = "No year found. Please send a year."
+    elif not play:
+        response["ERROR"] = "Play not found. Please send a play."
     elif key != "28c53a5c-f930-4069-92a9-c1999a17c66b":
         return jsonify("404")
-    # Check if the user entered a number
-    elif not (str(syear).isdigit() and str(eyear).isdigit() and str(week).isdigit() and str(des_year).isdigit()):
-        response["ERROR"] = "WE MUST HAVE A NUMBER."
-    else:
-        response["MESSAGE"] = f"Inputs are {syear} , {eyear} , {week} , {home_team} , {away_team}, {des_year}"
+    
 
     # Return the response in json format
     
+    # load_dotenv()
 
-    connection = mysql.connector.connect(
-    host="us-east.connect.psdb.cloud",
-    database="gatadata",
-    user="7bqi3gfwamobsbuo7e6x",
-    password="pscale_pw_cRkCN3J7mdynPokp2V9r3g0DwdhB8hVGxHe12UalsDg",
-    ssl_ca="/etc/ssl/certs/ca-certificates.crt",
-    )
-
-
-    cursor = connection.cursor()
-    sql = "SELECT * FROM data WHERE year = " + syear
-    cursor.execute(sql)
-    from pandas import DataFrame
-    df = DataFrame(cursor.fetchall())
-    df.columns = ["id", "year" , "week" , "neutral_site", "home_team", "home_conference", "home_points", "home_elo", "away_team", "away_conference", "away_points", "away_elo", "spread", "margin"]
-    connection.close()
+    # connection = mysql.connector.connect(
+    # host=os.getenv("HOST"),
+    # database=os.getenv("DATABASE"),
+    # user=os.getenv("IDENTITY"),
+    # password=os.getenv("PASSWORD"),
+    # ssl_ca=os.getenv("SSL_CERT")
+    # )
 
 
-    learn = load_learner('talking_tech_neural_net')
-    dumpster = df.query(f"year == {des_year}")
-    pdf = dumpster.copy()
-    dl = learn.dls.test_dl(pdf)
-    pdf['predicted'] = learn.get_preds(dl=dl)[0].numpy()
-    temp = pdf.loc[(pdf['home_team'] == home_team) & (pdf['away_team'] == away_team) & (pdf['week'] == int(week))].values.flatten().tolist()
-    answer = [temp[1], temp[2], temp[4], temp[8], temp[6], temp[10], temp[12], temp[14]]
+    # cursor = connection.cursor()
+    # sql = "SELECT * FROM data WHERE year = " + syear
+    # cursor.execute(sql)
+    # from pandas import DataFrame
+    # df = DataFrame(cursor.fetchall())
+    # df.columns = ["id", "year" , "week" , "neutral_site", "home_team", "home_conference", "home_points", "home_elo", "away_team", "away_conference", "away_points", "away_elo", "spread", "margin"]
+    # connection.close()
+
+
+    #add in URL params for ytg, offenseScore, defenseScpre
+
+    defenseScore = int(defenseScore)
+    offenseScore = int(offenseScore)
+    ytg = int(ytg)
+
+    f = open('coleClassifier.pkl', 'rb')
+    classifier = pickle.load(f)
+    f.close()
+    teams = pd.read_csv('teamsRatings.csv')
+    teams.reset_index(drop=True)
+    mergedData = pd.read_csv('coleBigData.csv')
+
+    #defenseScore = random.randint(10,60)
+    #offenseScore = defenseScore - random.randint(4,7)
+    #ytg = random.randint(1,20)
+    print("\nOffense: ", offenseScore ,"          ",defenseScore," :Defense")
+    print("\n          Time: 0:01")
+    print("\nYards to go: ", ytg)
+
+    offVal = teams['offPPA'].loc[teams['school'] == offense_team]
+    defVal = teams['defPPA'].loc[teams['school'] == defense_team]
+
+    X = np.array([offenseScore, defenseScore, ytg, offVal, defVal])
+    y_pred = classifier.predict(X.reshape(1, -1))
+    print(y_pred)
+
+    if(y_pred == 1):
+        regData = mergedData[mergedData['playOutcomeClass']==1]
+    else:
+        regData = mergedData[mergedData['playOutcomeClass']==0]
+
+    if(play == "Pass"):
+        regData = regData[regData['play_type'] != "Rush"]
+        regData = regData[regData['play_type'] != "Rushing Touchdown"]
+    else:
+        regData = regData[regData['play_type'] != "Pass Reception"]
+        regData = regData[regData['play_type'] != "Passing Touchdown"]
+
+    X1 = regData[['ytg','offense_score','defense_score','offVal', 'defVal']]
+    y1 = regData['yg']
+    kmeans = KMeans(n_clusters=19, max_iter=500, algorithm = 'auto')
+    kmeans.fit(X1)
+
+    test = np.array([ytg, offenseScore, defenseScore, offVal, defVal])
+    predictedOutcome = kmeans.predict(test.reshape(1, -1))
+    if(play == "Field Goal"):
+        predictedOutcome = 0
+        offenseScore += 3
+    if(predictedOutcome >= ytg):
+        offenseScore += 7
+    if(y_pred == 0):
+        predictedOutcome *= -1
+
+    print("Offense: ", offenseScore ,"          ",defenseScore," :Defense")
+    print("\n          Time: 0:00")
+    print("\nYards to go: ", ytg)
+    print("\nYards gained: ", predictedOutcome)
+
+    answer = (int(predictedOutcome))
     return jsonify(answer)
 
 
