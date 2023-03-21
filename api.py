@@ -95,8 +95,8 @@ def respond():
     offVal = teams['offPPA'].loc[teams['school'] == offense_team]
     defVal = teams['defPPA'].loc[teams['school'] == defense_team]
 
-    X = [[offenseScore, defenseScore, ytg, offVal, defVal]]
-    y_pred = classifier.predict(X)
+    X = np.array(offenseScore, defenseScore, ytg, offVal, defVal)
+    y_pred = classifier.predict(X.reshape(1,-1))
     print(y_pred)
 
     if(y_pred == 1):
