@@ -116,7 +116,7 @@ def respond():
     kmeans = KMeans(n_clusters=19, max_iter=500, algorithm = 'auto')
     kmeans.fit(X1)
 
-    test = np.array([ytg, offenseScore, defenseScore, offVal, defVal])
+    test = np.array([ytg, offenseScore, defenseScore, offVal, defVal], dtype=object)
     predictedOutcome = kmeans.predict(test.reshape(1, -1))
     if(play == "Field Goal"):
         predictedOutcome = 0
