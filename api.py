@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify
 import pickle
 import random
+#from multiprocessing import Pool
+from joblib import parallel_backend
+#from ray.util.joblib import register_ray
+#import ray
+import time
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
@@ -10,13 +15,22 @@ import os
 app = Flask(__name__)
 
 
+# def calc(offenseScore, defenseScore, ytg, offVal, defVal, classifier):
+#     X = np.array([offenseScore, defenseScore, ytg, offVal, defVal], dtype=object)
+#     y_pred = classifier.predict(X.reshape(1, -1))
+#     return y_pred
+
+#def calc1(X1, offenseScore, defenseScore, ytg, offVal, defVal):
+    #return(predictedOutcome)
+
 @app.route('/getinps/', methods=['GET'])
+
 def respond():
     # Retrieve the name from the url parameter /getmsg/?name=
     
-    defenseScore = request.args.get("defenseScore", None)
-    offenseScore = request.args.get("offenseScore", None)
-    ytg = request.args.get("ytg", None)
+    defenseScore = int(request.args.get("defenseScore", None))
+    offenseScore = int(request.args.get("offenseScore", None))
+    ytg = int(request.args.get("ytg", None))
     offense_team = request.args.get("offense_team", None)
     defense_team = request.args.get("defense_team", None)
     play = request.args.get("play", None)
@@ -54,50 +68,45 @@ def respond():
     
     # load_dotenv()
 
-    # connection = mysql.connector.connect(
-    # host=os.getenv("HOST"),
-    # database=os.getenv("DATABASE"),
-    # user=os.getenv("IDENTITY"),
-    # password=os.getenv("PASSWORD"),
-    # ssl_ca=os.getenv("SSL_CERT")
-    # )
-
-
-    # cursor = connection.cursor()
-    # sql = "SELECT * FROM data WHERE year = " + syear
-    # cursor.execute(sql)
-    # from pandas import DataFrame
-    # df = DataFrame(cursor.fetchall())
-    # df.columns = ["id", "year" , "week" , "neutral_site", "home_team", "home_conference", "home_points", "home_elo", "away_team", "away_conference", "away_points", "away_elo", "spread", "margin"]
-    # connection.close()
-
+    
 
     #add in URL params for ytg, offenseScore, defenseScpre
 
-    defenseScore = int(defenseScore)
-    offenseScore = int(offenseScore)
-    ytg = int(ytg)
+    # defenseScore = int(defenseScore)
+    # offenseScore = int(offenseScore)
+    # ytg = int(ytg)
 
+    
+    #/////////////////////////////////////////////////////////////////////////
+    start = time.perf_counter()
     f = open('coleClassifier.pkl', 'rb')
     classifier = pickle.load(f)
     f.close()
     teams = pd.read_csv('teamsRatings.csv')
     teams.reset_index(drop=True)
     mergedData = pd.read_csv('coleBigData.csv')
-
-    #defenseScore = random.randint(10,60)
-    #offenseScore = defenseScore - random.randint(4,7)
-    #ytg = random.randint(1,20)
     print("\nOffense: ", offenseScore ,"          ",defenseScore," :Defense")
     print("\n          Time: 0:01")
     print("\nYards to go: ", ytg)
-
     offVal = teams['offPPA'].loc[teams['school'] == offense_team]
     defVal = teams['defPPA'].loc[teams['school'] == defense_team]
+    #/////////////////////////////////////////////////////////////////////////
 
+
+
+
+    #multiprocessing
+    # with Pool() as p:
+    #     y_pred = p.starmap(calc, [(offenseScore, defenseScore, ytg, offVal, defVal, classifier),])
+    
+
+    #Ray
+    #ray.init()
     X = np.array([offenseScore, defenseScore, ytg, offVal, defVal], dtype=object)
-    y_pred = classifier.predict(X.reshape(1,-1))
-    print(y_pred)
+    #register_ray()
+    with parallel_backend('threading', n_jobs=-1):
+        y_pred = classifier.predict(X.reshape(1, -1))
+    #ray.shutdown()
 
     if(y_pred == 1):
         regData = mergedData[mergedData['playOutcomeClass']==1]
@@ -113,11 +122,20 @@ def respond():
 
     X1 = regData[['ytg','offense_score','defense_score','offVal', 'defVal']]
     y1 = regData['yg']
-    kmeans = KMeans(n_clusters=19, max_iter=500, algorithm = 'auto')
-    kmeans.fit(X1)
-
-    test = np.array([ytg, offenseScore, defenseScore, offVal, defVal], dtype=object)
-    predictedOutcome = kmeans.predict(test.reshape(1, -1))
+    
+    #with Pool() as p1:
+    #predictedOutcome = p1.starmap(calc1, [(X1, offenseScore, defenseScore, ytg, offVal, defVal),])
+    #predictedOutcome = calc1(X1, offenseScore, defenseScore, ytg, offVal, defVal)
+    with parallel_backend('threading', n_jobs=-1):
+        kmeans = KMeans(n_clusters=19, max_iter=500, algorithm = 'auto')
+        kmeans.fit(X1)
+        test = np.array([ytg, offenseScore, defenseScore, offVal, defVal], dtype=object)
+        predictedOutcome = kmeans.predict(test.reshape(1, -1))
+    
+    # zaza = 0
+    # for temp in predictedOutcome[0]:
+    #     zaza = temp
+    # predictedOutcome = zaza
     if(play == "Field Goal"):
         predictedOutcome = 0
         offenseScore += 3
@@ -125,11 +143,19 @@ def respond():
         offenseScore += 7
     if(y_pred == 0):
         predictedOutcome *= -1
-
+    
+    
+    
+    #/////////////////////////////////////////////////////////////////////////
     print("Offense: ", offenseScore ,"          ",defenseScore," :Defense")
     print("\n          Time: 0:00")
     print("\nYards to go: ", ytg)
     print("\nYards gained: ", predictedOutcome)
+    end =  time.perf_counter()
+    print("\nElapsed = {}s".format((end - start)))
+    #/////////////////////////////////////////////////////////////////////////
+
+    
 
     answer = (int(predictedOutcome))
     return jsonify(answer)
