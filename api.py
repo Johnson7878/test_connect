@@ -104,7 +104,7 @@ def respond():
     #ray.init()
     X = np.array([offenseScore, defenseScore, ytg, offVal, defVal], dtype=object)
     #register_ray()
-    with parallel_backend('threading', n_jobs=-1):
+    with parallel_backend('threading', n_jobs=1):
         y_pred = classifier.predict(X.reshape(1, -1))
     #ray.shutdown()
 
@@ -126,7 +126,7 @@ def respond():
     #with Pool() as p1:
     #predictedOutcome = p1.starmap(calc1, [(X1, offenseScore, defenseScore, ytg, offVal, defVal),])
     #predictedOutcome = calc1(X1, offenseScore, defenseScore, ytg, offVal, defVal)
-    with parallel_backend('threading', n_jobs=-1):
+    with parallel_backend('threading', n_jobs=1):
         kmeans = KMeans(n_clusters=19, max_iter=500, algorithm = 'auto')
         kmeans.fit(X1)
         test = np.array([ytg, offenseScore, defenseScore, offVal, defVal], dtype=object)
