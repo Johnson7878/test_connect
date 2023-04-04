@@ -85,9 +85,9 @@ def respond():
     teams = pd.read_csv('teamsRatings.csv')
     teams.reset_index(drop=True)
     mergedData = pd.read_csv('coleBigData.csv')
-    print("\nOffense: ", offenseScore ,"          ",defenseScore," :Defense")
-    print("\n          Time: 0:01")
-    print("\nYards to go: ", ytg)
+    #print("\nOffense: ", offenseScore ,"          ",defenseScore," :Defense")
+    #print("\n          Time: 0:01")
+    #print("\nYards to go: ", ytg)
     offVal = teams['offPPA'].loc[teams['school'] == offense_team]
     defVal = teams['defPPA'].loc[teams['school'] == defense_team]
     #/////////////////////////////////////////////////////////////////////////
@@ -147,10 +147,10 @@ def respond():
     
     
     #/////////////////////////////////////////////////////////////////////////
-    print("Offense: ", offenseScore ,"          ",defenseScore," :Defense")
-    print("\n          Time: 0:00")
-    print("\nYards to go: ", ytg)
-    print("\nYards gained: ", predictedOutcome)
+    #print("Offense: ", offenseScore ,"          ",defenseScore," :Defense")
+    #print("\n          Time: 0:00")
+    #print("\nYards to go: ", ytg)
+    #print("\nYards gained: ", predictedOutcome)
     end =  time.perf_counter()
     print("\nElapsed = {}s".format((end - start)))
     #/////////////////////////////////////////////////////////////////////////
