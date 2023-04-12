@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import pickle
 import random
+from flask_cors import CORS
 #from multiprocessing import Pool
 from joblib import parallel_backend
 #from ray.util.joblib import register_ray
@@ -13,6 +14,7 @@ import os
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 # def calc(offenseScore, defenseScore, ytg, offVal, defVal, classifier):
